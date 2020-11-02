@@ -32,11 +32,6 @@ const App = () => {
             component={WelcomeView}
             options={{ title: "Mongo Sync Demo" }}
           />
-          {/* <Stack.Screen
-            name="HomeScreen"
-            component={HomeScreen}
-            options={{ title: "Home Screen" }}
-          /> */}
           <Stack.Screen
             name="Hospitals"
             component={Hospitals}

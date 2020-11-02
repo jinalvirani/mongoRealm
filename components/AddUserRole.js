@@ -20,33 +20,58 @@ const { hospitalName , Id} = route.params;
 const [role,setRole] = useState('');
 const [email,setEmail] = useState('');
 const [loading,isloaded] = useState(false);
+const [h,seth] = useState([]);
 const user = app.currentUser;
 useEffect(() => {
-  return() => {
-      
-  }
-})
-//const realmRef = useRef(null);
-
-// useEffect(() => {
-//   return () => {
-//     console.log("ok");
-//     const HospitalRealm = realmRef.current;
-//     HospitalRealm.syncSession.uploadAllLocalChanges().then(() => {
-//         HospitalRealm.close();
-//         realmRef.current = null;
-//         console.log("close hospital realm");
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//     })
-//     ;  
-//   }
-// },[])
+  const config = {
+    sync: {
+      user: user,
+      partitionValue: 'PUBLIC',
+    },
+  };
+  Realm.open(config).then((testRealm) => {  
+    try{
+      const hospital = testRealm.objects('Hospital');
+      seth([...hospital])
+      //console.log(hospital);
+    }
+    catch(err)
+    {
+      console.log(err);
+    }
+    })
+    .catch((err) => {
+      console.log(err)
+      console.log("realm err");
+    });
+},[]);
 
 
 const addHospitalMember = (id) => {
+  console.log(h);
+  const UserSchema = {
+    name: 'User',
+    properties: {
+      _id: 'string',
+      _partition: 'string',
+      hospital: 'Hospital',
+      name: 'string',
+      role: 'string?',
+    },
+    primaryKey: '_id',
+  };
+  const HospitalSchema = {
+    name: 'Hospital',
+    properties: {
+      _id: 'objectId',
+      _partition: 'string',
+      city: 'string',
+      hospitalName: 'string',
+    },
+    primaryKey: '_id',
+  };
   const config = {
+    schema: [UserSchema, HospitalSchema],
     sync: {
       user: user,
       partitionValue: `Hospital=${Id}`,
@@ -56,13 +81,14 @@ const addHospitalMember = (id) => {
     try{
       const hospital = UserRealm.objects('Hospital').filtered("hospitalName == '" + hospitalName + "'");
       UserRealm.write( ()=> {
-        UserRealm.create('User', {
+        UserRealm.create('User', new User({
           _id: id,
           _partition: `Hospital=${Id}`,
-          hospital: hospital[0],
+          hospital: h[0],
           name: email,
           role: role,
-        });
+        })
+        );
       });
       const person = UserRealm.objects('User');
       console.log("user",person[0]);

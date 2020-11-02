@@ -31,6 +31,9 @@ useEffect(() => {
         try{
             const surgeon = SurgeonRealm.objects("User");
             setSurgeons([...surgeon]);
+            surgeon.addListener(() => {
+                setSurgeons([...surgeon]);
+              });
             isLoaded(true);
             // console.log("length",surgeons.length)
             // console.log("Surgons",surgeon);
@@ -41,6 +44,9 @@ useEffect(() => {
           Alert.alert(`${err}`);
         }
       });
+    return () => {
+        
+    }
 }, []);
 return(
     <View>
@@ -50,10 +56,13 @@ return(
                 flexDirection: 'row', 
                 padding:10}} key="1">
                 <View style={styles.tableRow}>
-                    <Text style={{fontSize:20, fontWeight:"bold"}}> Surgeon Name </Text>
+                    <Text style={{fontSize:16, fontWeight:"bold"}}>SurgeonName</Text>
                 </View>
                 <View style={styles.tableRow}>
-                    <Text style={{fontSize:20, fontWeight:"bold"}}> Role</Text>
+                    <Text style={{fontSize:16, fontWeight:"bold"}}> Role</Text>
+                </View>
+                <View style={styles.tableRow}>
+                    <Text style={{fontSize:16, fontWeight:"bold"}}> Hospital</Text>
                 </View>
                 </View> 
             </View>
@@ -68,6 +77,15 @@ return(
                         </View>
                         <View style={styles.tableRow}>
                             <Text> {surgeon.role}</Text>
+                        </View> 
+                        <View style={styles.tableRow}>
+                            <Text> 
+                                {
+                                surgeon.hospital?
+                                 JSON.parse(surgeon.hospital).hospitalName
+                                : null
+                                }
+                            </Text>
                         </View>  
                     </View>  
                 )

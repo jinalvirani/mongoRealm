@@ -56,10 +56,16 @@ const styles = StyleSheet.create({
     borderBottomWidth:1,
     paddingTop:10
   },
+  tableHeadercontainer:{
+    flex: 1, 
+    flexDirection: 'column',
+    padding:10,
+    marginTop:100
+  },
   tablecontainer:{
     flex: 1, 
     flexDirection: 'column',
-    padding:10
+    padding:10,
   },
   rowContainer:{
     flex: 1, 
@@ -70,7 +76,16 @@ const styles = StyleSheet.create({
   },
   tableRow:{ 
     flex: 1, 
-    alignSelf: 'stretch' 
+    alignSelf: 'stretch',
+  },
+  textBoxOverly:{
+    borderRadius:10,
+    borderBottomColor:'black',
+    borderWidth:1,
+    padding:10,
+    margin:2,
+    minWidth: 150, 
+    height: 50, 
   },
   manageTeamWrapper: {
     width: 350,
@@ -83,6 +98,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     marginTop: 5,
     fontSize: 18,
+  },
+  procedureStep:
+  {
+    flexDirection:'column',
+    paddingLeft:10,
+    paddingBottom:10,
+    marginBottom:20,
+    borderColor:'#E0E0E0',
+    borderBottomWidth:1
+  },
+  caseItems:
+  {
+    minWidth:80,
+    fontSize:10
   },
   manageTeamButtonContainer: {
     textAlign: "left",

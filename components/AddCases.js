@@ -13,19 +13,24 @@ import {
     Alert
   } from 'react-native';
 import { color } from 'react-native-reanimated';
+import Hospitals from './Hospitals';
 const app = getRealmApp();
 
 export default function AddCases({ route,navigation }){
 const { hospitalName , Id} = route.params;
 const [patient,setPatient] = useState('');
+const [caseName,setCaseName] = useState('');
 const [cases,setCases] = useState([]);
-const [surgeon,setSurgeon] = useState([]);
+const [orTeam,setORTeam] = useState([]);
+const [list,setList] = useState([{label: 'loading..', value: ''}]);
 const [loading,isLoaded] = useState(false);
 const [listCases, setListCases] = useState([]);
 const user = app.currentUser;
+const realmRef = useRef(null); 
+const caserealmRef = useRef(null); 
 
-useEffect(() => {
-  const config = {
+useEffect( () => {
+    const config = {
       sync: {
         user: user,
         partitionValue: `Hospital=${Id}`,
@@ -33,15 +38,32 @@ useEffect(() => {
     };
     Realm.open(config).then((CaseRealm) => {
       try{
+        caserealmRef.current = CaseRealm;
+        const surgeonList = CaseRealm.objects('User').filtered("role == 'Surgeon' ");
+          const surgeonDropdown = surgeonList.map((surgeon) => {
+            return {label: surgeon.name, value: surgeon._id}
+          })
+          setList([...surgeonDropdown])
+
           let caselist;
           if(user.customData.role === 'Surgeon')
-            caselist = CaseRealm.objects('Cases').filtered("surgeonId._id == '" + user.id +"'");
+            caselist = CaseRealm.objects('Cases').filtered("orTeam =[c] '" + user.id +"'");
           else
             caselist = CaseRealm.objects("Cases");
-          console.log(caselist);
           setCases([...caselist]);
+          caselist.addListener(() => {
+            setCases([...caselist]);
+          });
+          //console.log(caselist);
+//           const realm = realmRef.current;
+//           caselist.map((casee) => {
+//             let ans = realm.objects('Hospital');
+//             casee.surgeon=ans[0];
+//             console.log(casee)
+// ;          });
+          //console.log(caselist)
+          
           isLoaded(true);
-          //CaseRealm.close();
       }
       catch(err)
       {
@@ -49,51 +71,49 @@ useEffect(() => {
         Alert.alert(`${err}`);
       }
     });
-    
 }, []);
 
 const AddCase = () => {
-  const config = {
-    sync: {
-      user: user,
-      partitionValue: `Hospital=${Id}`,
-    },
-  };
-  Realm.open(config).then((CaseRealm) => {
+  console.log(patient,caseName,orTeam)
     try{
-      const surgeonobj = CaseRealm.objects('User').filtered("_id == '" + surgeon + "'");
-      console.log(surgeonobj);
-      CaseRealm.write(() => {
-        CaseRealm.create(
+     // const surgeonobj = CaseRealm.objects('User').filtered("_id == '" + surgeon + "'");
+     // console.log(surgeonobj);
+     const CaseRealm = caserealmRef.current;
+     CaseRealm.write(() => {
+      CaseRealm.create(
           "Cases",{
             _id: new ObjectId(),
             _partition: `Hospital=${Id}`,
+            caseName:caseName,
             patientName: patient,
-            surgeonId: surgeonobj[0],
+            hospital: JSON.stringify(Id),
+            orTeam: [orTeam],
           }
         );
-        CaseRealm.syncSession.uploadAllLocalChanges().then(() => {
-          CaseRealm.close();
-          console.log("Case Add closed");
-        });
+        console.log("case added");
+        // CaseRealm.syncSession.uploadAllLocalChanges().then(() => {
+        //   CaseRealm.close();
+        //   console.log("Case Add closed");
+        // });
       }); 
-      
     }
     catch(err)
     {
-      CaseRealm.close();
+      //CaseRealm.close();
       Alert.alert(`${err}`);
     }
-  })
-  .catch((openerr) => {
-    console.log(openerr);
-  });
 }
 
 return(
       <View>
         <View style={{padding:10}}>
           <View>
+            <TextInput
+              onChangeText={(text) => setCaseName(text)}
+              value={caseName}
+              placeholder="CaseName..."
+              style={styles.textBox}
+            />
             <TextInput
               onChangeText={(text) => setPatient(text)}
               value={patient}
@@ -103,12 +123,7 @@ return(
           </View>
           <View style={{width:200}}>
             <DropDownPicker
-              items={[
-                  {label: 'Surgeon1-monghiba', value: '5f95767d421334c99efb987d'},
-                  {label: 'Surgeon2-monghiba', value: '5f9576a2421334c99efbc96e'},
-                  {label: 'Surgeon1-unique', value: '5f9576df421334c99efbfb20'},
-                  {label: 'Surgeon2-unique', value: '5f9576ebb17223c820f23639'},
-              ]}
+              items={list}
               //defaultValue={this.state.country}
               containerStyle={{height: 60}}
               style={{paddingTop:10,marginTop:10}}
@@ -116,10 +131,11 @@ return(
                   justifyContent: 'flex-start'
               }}
               dropDownStyle={{backgroundColor: '#fafafa'}}
-              onChangeItem={item => setSurgeon(item.value)}
+              placeholder="Select OR Team"
+              onChangeItem={item => setORTeam(item.value)}
             />
           </View>
-          <View style={{width:100,marginLeft:250,position:'absolute', marginTop:75}}>
+          <View style={{width:100,marginLeft:250,position:'absolute', marginTop:125}}>
             <Button onPress={AddCase} title="Add" />
           </View>
         </View>
@@ -144,10 +160,14 @@ return(
                 cases.map((caseobj) =>    
                     <View style={styles.rowContainer} key={`${caseobj._id}`}>
                         <View style={styles.tableRow}>
+                            <Text> {caseobj.caseName}</Text>
+                        </View>
+                        <View style={styles.tableRow}>
                             <Text> {caseobj.patientName}</Text>
                         </View>
                         <View style={styles.tableRow}>
-                            <Text> {caseobj.surgeonId.name}</Text>
+                            <Text> {caseobj.orTeam[0]}</Text>
+                            <Text> {caseobj.orTeam[1]}</Text>
                         </View>  
                     </View>  
                 )

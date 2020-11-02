@@ -17,6 +17,7 @@ export function WelcomeView({ navigation }) {
 
   const signIn = async (email, password) => {
     const creds = Realm.Credentials.emailPassword(email, password);
+    //const creds = Realm.Credentials.emailPassword('kartik@gmail.com', '123456');
     const newUser = await app.logIn(creds);
     setUser(newUser);
   };

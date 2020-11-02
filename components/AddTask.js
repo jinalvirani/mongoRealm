@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { Overlay, Input, Button } from "react-native-elements";
+import { Overlay, Input, Button,TextInput,View, } from "react-native-elements";
 import styles from "../stylesheet";
 
 // The AddTask is a button for adding tasks. When the button is pressed, an
 // overlay shows up to request user input for the new task name. When the
 // "Create" button on the overlay is pressed, the overlay closes and the new
 // task is created in the realm.
-export function AddTask({ createTask }) {
+export function AddTask({ AddHospital }) {
   const [overlayVisible, setOverlayVisible] = useState(false);
-  const [newTaskName, setNewTaskName] = useState("");
+  const [hospitalName,setHospitalName] = useState('');
+  const [city,setCity] = useState('');
 
   return (
     <>
@@ -19,15 +20,19 @@ export function AddTask({ createTask }) {
       >
         <>
           <Input
-            placeholder="New Task Name"
-            onChangeText={(text) => setNewTaskName(text)}
+            placeholder="Hospital Name"
+            onChangeText={(text) => setHospitalName(text)}
             autoFocus={true}
           />
+          <Input
+            placeholder="City"
+            onChangeText={(text) => setCity(text)}
+          />
           <Button
-            title="Create"
+            title="Add"
             onPress={() => {
               setOverlayVisible(false);
-              createTask(newTaskName);
+              AddHospital(hospitalName,city);
             }}
           />
         </>
